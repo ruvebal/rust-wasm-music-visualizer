@@ -1,0 +1,19 @@
+{
+  "name": "rust-wasm-music-visualizer-x1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:wasm": "cargo build --manifest-path rust/Cargo.toml --target wasm32-unknown-unknown --release && mkdir -p public/wasm && cp rust/target/wasm32-unknown-unknown/release/visualizer_kernel.wasm public/wasm/visualizer_kernel.wasm",
+    "dev": "vite",
+    "build": "npm run build:wasm && vite build",
+    "test:rust": "cargo test --manifest-path rust/Cargo.toml -- --test-threads=1",
+    "test:browser": "node test/wasm-boundary.mjs",
+    "test": "npm run test:rust && npm run test:browser"
+  },
+  "dependencies": {
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "vite": "^7.1.7"
+  }
+}
