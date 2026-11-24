@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "npm run build:wasm && vite build",
     "test:rust": "cargo test --manifest-path rust/Cargo.toml -- --test-threads=1",
-    "test:browser": "node test/wasm-boundary.mjs",
+    "test:browser": "npm run build:wasm && node test/wasm-boundary.mjs",
     "test": "npm run test:rust && npm run test:browser"
   },
   "dependencies": {
