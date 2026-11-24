@@ -11,6 +11,7 @@ const play = $('play');
 const seek = $('seek');
 const loop = $('loop');
 const visualizer = $('visualizer');
+const studentOption = visualizer.querySelector('option[value="student"]');
 const pluginUrl = $('plugin-url');
 const loadPlugin = $('load-plugin');
 
@@ -28,6 +29,8 @@ let frameCount = 0;
 let fpsWindowStart = lastFrame;
 let audioState = 'loading';
 let activePlugin = null;
+let currentTrackName = 'local fixture';
+let currentObjectUrl = null;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color('#090c14');
@@ -101,7 +104,7 @@ async function startAudio() {
   status.textContent = 'Loading audio…';
   audioContext ??= new AudioContext();
   await audioContext.resume();
-  if (!audioElement) { audioElement = new Audio(`${import.meta.env.BASE_URL}audio/fixture-tone.wav`); wireAudioEvents(); }
+  if (!audioElement) { audioElement = new Audio(`${import.meta.env.BASE_URL}audio/fixture-tone.wav`); currentTrackName = 'local fixture'; wireAudioEvents(); }
   if (!analyser) {
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 512;
@@ -114,7 +117,7 @@ async function startAudio() {
   started = true;
   audioState = 'playing';
   play.textContent = 'Pause audio';
-  status.textContent = 'Playing local fixture';
+  status.textContent = `Playing ${currentTrackName}`;
 }
 
 function connectAudioElement() {
@@ -129,7 +132,7 @@ function connectAudioElement() {
 function wireAudioEvents() {
   audioElement.addEventListener('loadedmetadata', () => { seek.max = String(audioElement.duration || 1); seek.disabled = false; });
   audioElement.addEventListener('timeupdate', () => { if (!seek.matches(':active')) seek.value = String(audioElement.currentTime); $('seek-output').textContent = formatTime(audioElement.currentTime); });
-  audioElement.addEventListener('ended', () => { started = false; audioState = 'ended'; play.textContent = 'Start audio'; status.textContent = 'Track ended'; });
+  audioElement.addEventListener('ended', () => { started = false; audioState = 'ended'; play.textContent = 'Start audio'; status.textContent = `Track ended: ${currentTrackName}`; });
   audioElement.addEventListener('error', () => { started = false; audioState = 'error'; play.textContent = 'Start audio'; status.textContent = 'Unsupported or unreadable audio'; $('status-dot').classList.add('error'); });
 }
 
@@ -144,7 +147,10 @@ file.addEventListener('change', () => {
   const selected = file.files?.[0];
   if (!selected) return;
   if (audioElement) audioElement.pause();
-  audioElement = new Audio(URL.createObjectURL(selected));
+  if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
+  currentObjectUrl = URL.createObjectURL(selected);
+  audioElement = new Audio(currentObjectUrl);
+  currentTrackName = selected.name;
   audioElement.loop = loop.checked;
   wireAudioEvents();
   if (audioContext) connectAudioElement();
@@ -168,6 +174,7 @@ loadPlugin.addEventListener('click', async () => {
     const module = await import(/* @vite-ignore */ url);
     if (typeof module.createVisualizer !== 'function') throw new Error('module must export createVisualizer(context)');
     activePlugin = await module.createVisualizer({ THREE, scene, group, canvas: sceneCanvas });
+    studentOption.disabled = false;
     visualizer.value = 'student';
     status.textContent = `Loaded student visualizer: ${module.name || url}`;
   } catch (error) { status.textContent = `Plugin unavailable: ${error.message}`; $('status-dot').classList.add('error'); }
