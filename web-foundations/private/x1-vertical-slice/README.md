@@ -19,8 +19,9 @@ npm run dev -- --host 127.0.0.1
 Open Vite's printed URL. Wasm builds automatically before the dev server starts.
 No sound starts until a user gesture. **Play** runs a 12-second original synthetic
 fixture: bass, middle, high, blend, silence. It is a test signal, not a music track.
-Choose local audio to see the response to your own recording. The included WAV
-can be rebuilt with `python3 scripts/generate-fixture.py`.
+The demo also includes “Thais Theme · Owls” (© 2024 Rubén Vega Balbás & Thais Vega
+Egido; rights cleared for this demo). Choose local audio to see the response to your
+own recording. The included WAV can be rebuilt with `python3 scripts/generate-fixture.py`.
 
 ```sh
 npx playwright install chromium
@@ -126,9 +127,10 @@ protocol is needed. The test-only `replay(hz)` helper runs one second of a const
 input at a chosen refresh rate so 30/144 Hz responses can be compared.
 
 JavaScript stores three previous values. Reset and seek clear them. A new track
-cannot inherit the old one's energy. The sculpture uses media time in closed-form
-angles (`sin(time * rate)`), not cumulative `rotation += step`. Silence settles to
-rest. Identical time and feature sequences reproduce the mappings; live analyser
+cannot inherit the old one's energy. The sculpture uses an authored motion clock for
+a gentle idle orbit and media time for audio-related phase, not cumulative
+`rotation += step`. Silence still changes the form only through the authored idle
+motion. Identical time and feature sequences reproduce the mappings; live analyser
 snapshots vary with browser scheduling, decoding and FFT windows. We do not claim
 bit-identical audiovisual replay or sample-accurate speaker/display alignment.
 

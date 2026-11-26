@@ -18,6 +18,7 @@ let smoothed = silence();
 const features = silence();
 let values = { aperture: 0.12, coreScale: 0.72, radiance: 0.15 };
 let lastFrame = performance.now();
+let motionTime = 0;
 let frameCount = 0, fpsStart = lastFrame, lastReadout = 0, fps = 0, frameId;
 let cameraAngle = 24 * Math.PI / 180;
 const scene = new THREE.Scene();
@@ -124,6 +125,7 @@ listen($('play'), 'click', () => void transport.toggle());
 listen($('stage-play'), 'click', () => void transport.toggle());
 listen($('file'), 'change', () => { transport.loadFile($('file').files?.[0]); $('file').value = ''; });
 listen($('fixture'), 'click', () => transport.useFixture());
+listen($('thais'), 'click', () => transport.useThaisTheme(`${import.meta.env.BASE_URL}audio/thais_theme_owls_v2.mp3`));
 listen($('seek'), 'input', () => transport.seek(Number($('seek').value)));
 listen($('gain'), 'input', () => transport.setGain(Number($('gain').value)));
 listen($('loop'), 'change', () => transport.setLoop($('loop').checked));
@@ -214,6 +216,7 @@ function animate(now) {
   frameId = requestAnimationFrame(animate);
   const delta = clamp((now - lastFrame) / 1000, 0, 0.1);
   lastFrame = now;
+  motionTime += delta;
   if (document.hidden || contextLost) return;
   Object.assign(features, transport.features());
   if (kernel) {
@@ -224,7 +227,7 @@ function animate(now) {
     values = { aperture: kernel.aperture(features.rms), coreScale: kernel.core_scale(features.bass), radiance: kernel.radiance(features.high) };
   }
   const time = transport.audio.currentTime || 0;
-  visualizer?.update({ values, time, delta, reducedMotion: $('motion').checked });
+  visualizer?.update({ values, time, motionTime, delta, reducedMotion: $('motion').checked });
   if ($('drift').checked && !$('motion').checked) {
     placeCamera(Math.sin(time * 0.07) * features.rms * 0.12);
     orbit?.update();
@@ -262,7 +265,7 @@ if (import.meta.hot) import.meta.hot.dispose(dispose);
 if (new URLSearchParams(location.search).has('test')) {
   window.orreryTest = () => ({
     ready: Boolean(kernel && renderer), state: transport.state, playing: transport.playing,
-    time: transport.audio.currentTime, duration: transport.duration, gain: transport.gain,
+    time: transport.audio.currentTime, motionTime, duration: transport.duration, gain: transport.gain,
     loop: transport.audio.loop, muted: transport.muted, features: { ...features }, values: { ...values },
     reducedMotion: $('motion').checked, camera: camera.position.toArray(),
     drawCalls: renderer?.info.render.calls, geometries: renderer?.info.memory.geometries, fps,

@@ -91,18 +91,20 @@ export function createVisualizer({ scene, THREE, features, options = {} }) {
 
   let disposed = false;
   return {
-    update({ values, time, reducedMotion }) {
+    update({ values, time, motionTime = time, reducedMotion }) {
       if (disposed) return;
       const still = reducedMotion || options.reducedMotion;
-      // All angles are addressed by media time; no accumulated rotation or randomness.
-      const phase = time * 0.18;
+      // Media time shapes the audio relationship; motionTime keeps the sculpture alive when paused.
+      const phase = motionTime * 0.35;
+      const audioPhase = time * 0.18;
       const opening = still ? 0.32 : values.aperture;
       hinges.forEach((hinge) => { hinge.rotation.z = -opening; });
-      core.scale.setScalar(still ? 0.82 : values.coreScale);
+      const idleBreath = still ? 1 : 1 + Math.sin(phase * 0.7) * 0.025;
+      core.scale.setScalar((still ? 0.82 : values.coreScale) * idleBreath);
       cage.scale.setScalar(still ? 1 : 0.96 + features.bass * 0.12);
-      assembly.rotation.y = still ? 0 : Math.sin(phase) * features.rms * 0.35;
-      core.rotation.set(0.2, still ? 0 : Math.sin(phase * 0.7) * features.bass, 0.1);
-      gimbals.rotation.y = still ? 0 : Math.sin(phase * 0.4) * features.rms * 0.22;
+      assembly.rotation.y = still ? 0 : phase + Math.sin(audioPhase) * features.rms * 0.35;
+      core.rotation.set(0.2, still ? 0 : Math.sin(audioPhase * 0.7) * features.bass, 0.1);
+      gimbals.rotation.y = still ? 0 : -phase * 0.42 + Math.sin(audioPhase * 0.4) * features.rms * 0.22;
       // Reduced motion keeps shape fixed; slowly smoothed lighting still explains audio.
       luminous.emissiveIntensity = values.radiance;
       edgeMaterial.opacity = 0.28 + features.high * 0.65;

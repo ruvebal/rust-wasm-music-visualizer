@@ -37,3 +37,18 @@ test('module replays transforms, honors reduced motion and releases each shared 
   assert.equal(scene.children.length, 0);
   assert.ok([...counts.values()].every((count) => count === 1));
 });
+
+test('module keeps a quiet authored orbit while audio is paused', () => {
+  const scene = new THREE.Scene();
+  const features = { rms: 0, bass: 0, high: 0 };
+  const visualizer = createVisualizer({ scene, THREE, features, options: {} });
+  const root = scene.children[0];
+  const assembly = root.children.find((child) => child.type === 'Group' && child.position.y === 0.3);
+  visualizer.update({ values: { aperture: 0.12, coreScale: 0.72, radiance: 0.15 }, time: 0, motionTime: 0, reducedMotion: false });
+  const first = assembly.rotation.y;
+  visualizer.update({ values: { aperture: 0.12, coreScale: 0.72, radiance: 0.15 }, time: 0, motionTime: 8, reducedMotion: false });
+  assert.notEqual(assembly.rotation.y, first);
+  visualizer.update({ values: { aperture: 0.12, coreScale: 0.72, radiance: 0.15 }, time: 0, motionTime: 16, reducedMotion: true });
+  assert.equal(assembly.rotation.y, 0);
+  visualizer.dispose();
+});
