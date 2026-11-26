@@ -31,7 +31,8 @@ export function createVisualizer({ scene, THREE, features, options = {} }) {
   assembly.rotation.z = 0.16;
   root.add(assembly);
   const core = addMesh(new THREE.IcosahedronGeometry(0.66, 1), luminous, assembly);
-  const cage = addMesh(new THREE.IcosahedronGeometry(0.8, 0), new THREE.MeshStandardMaterial({ color: '#d7a363', wireframe: true, metalness: 0.45, roughness: 0.4 }), assembly);
+  const cageMaterial = new THREE.MeshStandardMaterial({ color: '#d7a363', wireframe: true, metalness: 0.45, roughness: 0.4 });
+  const cage = addMesh(new THREE.IcosahedronGeometry(0.8, 0), cageMaterial, assembly);
   const innerRing = addMesh(new THREE.TorusGeometry(0.98, 0.035, 8, 64), brass, assembly);
   innerRing.rotation.x = Math.PI / 2;
   innerRing.position.y = -0.5;
@@ -67,15 +68,17 @@ export function createVisualizer({ scene, THREE, features, options = {} }) {
   const ringA = addMesh(ringGeometry, brass, gimbals);
   ringA.rotation.set(0.65, 0.3, 0);
   const ringB = addMesh(ringGeometry, dark, gimbals);
+  ringB.name = 'Orbital wire B';
   ringB.rotation.set(-0.45, 1.05, 0.2);
   ringB.scale.setScalar(1.08);
   const marker = addMesh(new THREE.SphereGeometry(0.09, 16, 12), luminous, ringA);
   marker.position.x = 2.18;
   const moonOrbit = new THREE.Group();
   moonOrbit.name = 'Moon orbit';
-  root.add(moonOrbit);
+  // The moon belongs to the previously empty wire, never to the free stage.
+  ringB.add(moonOrbit);
   const moon = addMesh(new THREE.SphereGeometry(0.16, 24, 16), new THREE.MeshStandardMaterial({ color: '#b7c8ff', emissive: '#344a88', emissiveIntensity: 0.35, metalness: 0.2, roughness: 0.55 }), moonOrbit);
-  moon.position.set(2.65, 0.55, 0);
+  moon.position.set(2.18, 0, 0);
 
   const floor = addMesh(new THREE.CircleGeometry(12, 96), new THREE.MeshStandardMaterial({ color: '#0e1918', roughness: 0.9 }));
   floor.rotation.x = -Math.PI / 2;
@@ -112,10 +115,11 @@ export function createVisualizer({ scene, THREE, features, options = {} }) {
       gimbals.rotation.y = still ? 0 : -phase * 0.42 + Math.sin(audioPhase * 0.4) * features.rms * 0.22;
       marker.scale.setScalar(still ? 1 : 1 + (features.beatPulse || 0) * 1.8);
       brass.color.setHSL(0.08 - features.bass * 0.035, 0.52, 0.52 + features.bass * 0.12);
+      metal.color.setHSL(0.47 - (features.mid || 0) * 0.12, 0.22 + (features.mid || 0) * 0.35, 0.68);
+      cageMaterial.color.setHSL(0.54 + features.high * 0.12, 0.48, 0.45 + features.high * 0.2);
       luminous.color.setHSL(0.42 - (features.mid || 0) * 0.12, 0.72, 0.62);
       luminous.emissive.setHSL(0.42 + features.high * 0.08, 0.78, 0.62);
-      moonOrbit.rotation.y = still ? 0 : phase * 0.8 + (features.bpm || 0) * 0.0008;
-      moon.position.y = 0.55 + (still ? 0 : Math.sin(phase * 1.7) * 0.12 + (features.beatPulse || 0) * 0.08);
+      moonOrbit.rotation.z = still ? 0 : phase * 0.8 + (features.bpm || 0) * 0.0008;
       moon.material.color.setHSL(0.62 - features.high * 0.16, 0.68, 0.62 + features.mid * 0.12);
       moon.material.emissiveIntensity = 0.25 + features.high * 0.65 + (features.beatPulse || 0) * 0.6;
       // Reduced motion keeps shape fixed; slowly smoothed lighting still explains audio.

@@ -8,6 +8,9 @@ test('module replays transforms, honors reduced motion and releases each shared 
   const features = { rms: 0.8, bass: 0.5, high: 0.9 };
   const visualizer = createVisualizer({ scene, THREE, features, options: {} });
   const root = scene.children[0];
+  const moonOrbit = root.getObjectByName('Moon orbit');
+  assert.ok(moonOrbit);
+  assert.equal(moonOrbit.parent.name, 'Orbital wire B');
   const transforms = () => {
     root.updateMatrixWorld(true);
     const result = [];
