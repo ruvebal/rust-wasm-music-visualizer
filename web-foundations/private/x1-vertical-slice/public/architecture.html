@@ -9,9 +9,10 @@
 <ol>
 <li><strong>The browser decodes your file.</strong> A local Blob URL gives an <code>HTMLAudioElement</code> access to the selected recording. There is no upload.</li>
 <li><strong>Web Audio measures the sound.</strong> The element feeds a gain node, then an analyser, then your speakers. Gain affects what you hear and what the sculpture sees. Mute sets gain to zero.</li>
-<li><strong>JavaScript normalizes three features.</strong> RMS measures overall waveform energy. Bass sums frequency-bin power from 35–250 Hz; highs use 2–10 kHz. Each becomes a number between zero and one. The readings are relative, not calibrated decibels.</li>
+<li><strong>JavaScript normalizes four continuous features.</strong> RMS measures overall waveform energy. Low sums frequency-bin power from 35–250 Hz, mid from 250–2000 Hz, and high from 2–10 kHz. Each becomes a number between zero and one. The readings are relative, not calibrated decibels.</li>
+<li><strong>A small rhythm tracker estimates tempo.</strong> <code>src/rhythm.js</code> compares repeated low-band rises against an adaptive <code>baseline × thresholdFactor</code>. It emits a bounded <code>bpm</code> estimate and a short <code>beatPulse</code>. This is an explainable onset detector, not a metronome or production-grade tempo engine.</li>
 <li><strong>Rust smooths and maps numbers.</strong> JavaScript supplies each previous value, the new feature, and elapsed seconds. Rust returns a smooth value, then maps it into a bounded visual range. Rust owns no browser resources.</li>
-<li><strong>Three.js renders the result.</strong> Hinges open, the core expands, and edges brighten. A perspective camera, lit materials, depth testing and shadows make their spatial relationships visible.</li>
+<li><strong>Three.js renders the result.</strong> Hinges open, the core expands, materials change colour by band, and beat pulses brighten the marker and moon. A perspective camera, lit materials, depth testing and shadows make their spatial relationships visible.</li>
 </ol>
 <h2>Every Rust function</h2>
 <table><thead><tr><th>Function</th><th>Beginner's explanation</th></tr></thead><tbody>
@@ -25,11 +26,31 @@
 <h2>Time, silence and motion</h2>
 <p>Audio time explains the music relationship; a separate authored motion clock keeps the sculpture gently orbiting when playback is paused. Identical motion time and feature values give identical geometry. Live analyser samples can differ across browser schedules, so this is not sample-accurate synchronization. Reduced motion fixes spatial animation and retains slowly smoothed lighting.</p>
 <h2>Your student visualizer</h2>
-<p>The implemented module exports <code>createVisualizer({ scene, THREE, features, options })</code>. It creates one owned group and returns <code>update({ values, time, delta, reducedMotion })</code>, <code>resize({ width, height, pixelRatio })</code> and <code>dispose()</code>.</p>
+<p>The implemented module exports <code>createVisualizer({ scene, THREE, features, options })</code>. It creates one owned group and returns <code>update({ values, time, motionTime, delta, reducedMotion })</code>, <code>resize({ width, height, pixelRatio })</code> and <code>dispose()</code>.</p>
+<table><thead><tr><th>Feature</th><th>Meaning</th><th>Suggested visual use</th></tr></thead><tbody>
+<tr><td><code>features.rms</code></td><td>relative overall energy</td><td>global scale or aperture</td></tr>
+<tr><td><code>features.bass</code></td><td>35–250 Hz</td><td>weight, expansion, warm colour</td></tr>
+<tr><td><code>features.mid</code></td><td>250–2000 Hz</td><td>rotation, deformation, hue</td></tr>
+<tr><td><code>features.high</code></td><td>2–10 kHz</td><td>emissive light, edge colour, sparkle</td></tr>
+<tr><td><code>features.bpm</code></td><td>bounded onset-based estimate</td><td>tempo label or phase choice</td></tr>
+<tr><td><code>features.beatPulse</code></td><td>short 0–1 onset pulse</td><td>ring burst, flash, bounded accent</td></tr>
+</tbody></table>
+<pre><code>export function createVisualizer({ scene, THREE, features, options }) {
+  const root = new THREE.Group();
+  scene.add(root);
+  return {
+    update({ time, motionTime, delta, reducedMotion }) {
+      root.rotation.y = motionTime * 0.2 + features.mid * time * 0.1;
+      // Map bass, mid, high and beatPulse deliberately.
+    },
+    resize() {},
+    dispose() { scene.remove(root); },
+  };
+}</code></pre>
 <ul><li>Read the smoothed normalized features and bounded values. Modify only your group's objects and resources.</li><li>The host owns the scene, renderer, camera, audio, and animation loop. Do not create a second loop or audio graph.</li><li>Resize updates only module-specific resources such as shader resolution; the host updates the camera and canvas.</li><li>Dispose removes the group and frees each owned geometry, material, texture and listener once. Shared geometry must not be freed twice.</li></ul>
-<p>Replace the module import in <code>src/main.js</code> to build your own. Runtime URL plugin loading is a <strong>future extension</strong>, not a finished plugin system.</p>
-<h2>One optional next experiment</h2>
-<p><strong>Future extension: beat/event detection.</strong> Add an isolated event detector that receives feature snapshots and media time. Test onset thresholds, minimum intervals and reset after seeking. Feed event pulses through the same visualizer contract. The core instrument does not currently detect beats or tempo.</p>
+<p>Replace the module import in <code>src/main.js</code> to build your own. Runtime URL plugin loading is a <strong>future extension</strong>, not a finished plugin system. If you add a moon or satellite, attach it to an intentional group or wire; never let it float as an unexplained free object. Check that the full orbit clears the plinth and floor.</p>
+<h2>Research and extension boundary</h2>
+<p>The baseline includes beat estimation so students can inspect and test the complete path. FFT is useful but not mandatory for BPM: spectral flux plus autocorrelation, wavelet envelopes, or classical DSP libraries are valid research extensions. Tune and document the threshold factor, show one false positive or missed beat, and do not describe aubio as machine learning without evidence.</p>
 <p>Engineering lessons were adapted from the author's Vibrasolids / First Light project: explicit boundaries, audio-addressed time, resource cleanup and honest labels for designed mappings. No synthesis engine or research tables are included.</p>
 <footer>Rubén Vega Balbás, PhD · ruvebal@crea-comm.net · UDIT</footer>
 </body></html>
