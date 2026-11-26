@@ -2,7 +2,9 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   testDir: './test/e2e',
-  timeout: 30000,
+  // GitHub Pages CI can run Chromium with software WebGL; allow stateful audio tests
+  // to finish without changing the behavior or the assertions.
+  timeout: 60000,
   workers: 1,
   retries: 0,
   use: {
