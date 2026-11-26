@@ -47,6 +47,16 @@
     dispose() { scene.remove(root); },
   };
 }</code></pre>
+<h3>How to read this factory</h3>
+<ol>
+<li><code>export function</code> makes the module’s entry point importable by the host. The host calls this once after it has created the shared scene.</li>
+<li><code>{ scene, THREE, features, options }</code> is the dependency boundary. The host supplies the scene graph, the Three.js namespace, the live analysis object and optional configuration. The module does not create a second audio graph.</li>
+<li><code>new THREE.Group()</code> creates the module’s ownership boundary. Every mesh, light and listener created by the module belongs under this group.</li>
+<li><code>update(...)</code> runs once per animation frame. Use <code>features</code> for sound, <code>time</code> for media position, <code>motionTime</code> for authored continuous motion, and <code>reducedMotion</code> to suppress spatial animation.</li>
+<li><code>resize(...)</code> is for module-specific resources such as shader resolution. The host still owns the camera and renderer size.</li>
+<li><code>dispose()</code> is the cleanup promise: remove the group and release every resource created by the module exactly once.</li>
+</ol>
+<p>Read the complete reference implementation in <a href="https://github.com/ruvebal/rust-wasm-music-visualizer/blob/main/web-foundations/private/x1-vertical-slice/src/visualizers/tidal-orrery.js"><code>src/visualizers/tidal-orrery.js</code></a>. Continue with <a href="https://ruvebal.github.io/web-atelier-udit/lessons/en/rust-wasm-music-visualizer/l1-rust-browser-boundary/">L1 · Rust/browser boundary</a> for the host contract, <a href="https://ruvebal.github.io/web-atelier-udit/lessons/en/rust-wasm-music-visualizer/l2-audio-features/">L2 · audio features</a> for <code>features</code>, <a href="https://ruvebal.github.io/web-atelier-udit/lessons/en/rust-wasm-music-visualizer/l3-gpu-3d/">L3 · GPU/3D</a> for the owned scene, and <a href="https://ruvebal.github.io/web-atelier-udit/lessons/en/rust-wasm-music-visualizer/l4-clocks-controls/">L4 · clocks and controls</a> for <code>time</code>, <code>motionTime</code> and interaction.</p>
 <ul><li>Read the smoothed normalized features and bounded values. Modify only your group's objects and resources.</li><li>The host owns the scene, renderer, camera, audio, and animation loop. Do not create a second loop or audio graph.</li><li>Resize updates only module-specific resources such as shader resolution; the host updates the camera and canvas.</li><li>Dispose removes the group and frees each owned geometry, material, texture and listener once. Shared geometry must not be freed twice.</li></ul>
 <p>Replace the module import in <code>src/main.js</code> to build your own. Runtime URL plugin loading is a <strong>future extension</strong>, not a finished plugin system. If you add a moon or satellite, attach it to an intentional group or wire; never let it float as an unexplained free object. Check that the full orbit clears the plinth and floor.</p>
 <h2>Research and extension boundary</h2>
