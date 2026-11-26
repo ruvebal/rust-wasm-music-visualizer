@@ -104,7 +104,9 @@ square root, multiplies by a Designed factor of 2, and clamps to 0–1. An RMS g
 below 0.002 suppresses residual FFT history. Values are **Computed relative
 features**, not calibrated loudness or pitch detection. `src/rhythm.js` watches
 repeated low-frequency rises and reports a bounded BPM *estimate* plus a short
-beat pulse; it is an onset teaching example, not a production-grade tempo tracker.
+beat pulse; its adaptive threshold is `baseline × thresholdFactor` with a small
+floor. It is an onset teaching example, not a production-grade tempo tracker.
+Students should tune and test the factor rather than hide it as unexplained magic.
 
 Gain is before the analyser, so quieter output makes a quieter sculpture. The
 slider only attenuates: it does not add clipping by amplifying above unity. The

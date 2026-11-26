@@ -38,9 +38,10 @@ test('time formatting tolerates unavailable metadata', () => {
 });
 test('beat tracker estimates a bounded tempo from repeated bass onsets', () => {
   const tracker = new BeatTracker();
-  tracker.update({ bass: 0.8, rms: 0.8, time: 0, delta: 0.016 });
+  for (let time = 0; time < 0.2; time += 0.04) tracker.update({ bass: 0.05, rms: 0.1, time, delta: 0.04 });
+  tracker.update({ bass: 0.8, rms: 0.8, time: 0.2, delta: 0.04 });
   tracker.update({ bass: 0.02, rms: 0.1, time: 0.25, delta: 0.25 });
-  const result = tracker.update({ bass: 0.8, rms: 0.8, time: 0.5, delta: 0.25 });
+  const result = tracker.update({ bass: 0.8, rms: 0.8, time: 0.7, delta: 0.25 });
   assert.equal(result.bpm, 120);
   assert.equal(result.beatPulse, 1);
   assert.ok(tracker.update({ bass: 0, rms: 0, time: 0.7, delta: 0.2 }).beatPulse < 1);

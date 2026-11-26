@@ -71,6 +71,11 @@ export function createVisualizer({ scene, THREE, features, options = {} }) {
   ringB.scale.setScalar(1.08);
   const marker = addMesh(new THREE.SphereGeometry(0.09, 16, 12), luminous, ringA);
   marker.position.x = 2.18;
+  const moonOrbit = new THREE.Group();
+  moonOrbit.name = 'Moon orbit';
+  root.add(moonOrbit);
+  const moon = addMesh(new THREE.SphereGeometry(0.16, 24, 16), new THREE.MeshStandardMaterial({ color: '#b7c8ff', emissive: '#344a88', emissiveIntensity: 0.35, metalness: 0.2, roughness: 0.55 }), moonOrbit);
+  moon.position.set(2.65, 0.55, 0);
 
   const floor = addMesh(new THREE.CircleGeometry(12, 96), new THREE.MeshStandardMaterial({ color: '#0e1918', roughness: 0.9 }));
   floor.rotation.x = -Math.PI / 2;
@@ -109,6 +114,10 @@ export function createVisualizer({ scene, THREE, features, options = {} }) {
       brass.color.setHSL(0.08 - features.bass * 0.035, 0.52, 0.52 + features.bass * 0.12);
       luminous.color.setHSL(0.42 - (features.mid || 0) * 0.12, 0.72, 0.62);
       luminous.emissive.setHSL(0.42 + features.high * 0.08, 0.78, 0.62);
+      moonOrbit.rotation.y = still ? 0 : phase * 0.8 + (features.bpm || 0) * 0.0008;
+      moon.position.y = 0.55 + (still ? 0 : Math.sin(phase * 1.7) * 0.12 + (features.beatPulse || 0) * 0.08);
+      moon.material.color.setHSL(0.62 - features.high * 0.16, 0.68, 0.62 + features.mid * 0.12);
+      moon.material.emissiveIntensity = 0.25 + features.high * 0.65 + (features.beatPulse || 0) * 0.6;
       // Reduced motion keeps shape fixed; slowly smoothed lighting still explains audio.
       luminous.emissiveIntensity = values.radiance;
       edgeMaterial.opacity = 0.28 + features.high * 0.65;
