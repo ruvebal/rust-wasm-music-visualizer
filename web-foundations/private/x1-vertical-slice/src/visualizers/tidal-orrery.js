@@ -102,12 +102,17 @@ export function createVisualizer({ scene, THREE, features, options = {} }) {
       const idleBreath = still ? 1 : 1 + Math.sin(phase * 0.7) * 0.025;
       core.scale.setScalar((still ? 0.82 : values.coreScale) * idleBreath);
       cage.scale.setScalar(still ? 1 : 0.96 + features.bass * 0.12);
-      assembly.rotation.y = still ? 0 : phase + Math.sin(audioPhase) * features.rms * 0.35;
+      assembly.rotation.y = still ? 0 : phase + Math.sin(audioPhase) * (features.mid || 0) * 0.55;
       core.rotation.set(0.2, still ? 0 : Math.sin(audioPhase * 0.7) * features.bass, 0.1);
       gimbals.rotation.y = still ? 0 : -phase * 0.42 + Math.sin(audioPhase * 0.4) * features.rms * 0.22;
+      marker.scale.setScalar(still ? 1 : 1 + (features.beatPulse || 0) * 1.8);
+      brass.color.setHSL(0.08 - features.bass * 0.035, 0.52, 0.52 + features.bass * 0.12);
+      luminous.color.setHSL(0.42 - (features.mid || 0) * 0.12, 0.72, 0.62);
+      luminous.emissive.setHSL(0.42 + features.high * 0.08, 0.78, 0.62);
       // Reduced motion keeps shape fixed; slowly smoothed lighting still explains audio.
       luminous.emissiveIntensity = values.radiance;
       edgeMaterial.opacity = 0.28 + features.high * 0.65;
+      edgeMaterial.color.setHSL(0.42 + features.high * 0.08, 0.78, 0.62);
     },
     resize({ width, height, pixelRatio }) {
       // Layout belongs to the host camera. A student shader could update resolution here.

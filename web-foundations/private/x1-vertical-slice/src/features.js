@@ -1,6 +1,6 @@
 // Pure analysis helpers. Computed readings; normalization multipliers are Designed.
 export const clamp = (value, min = 0, max = 1) => Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : min;
-export const silence = () => ({ rms: 0, bass: 0, high: 0 });
+export const silence = () => ({ rms: 0, bass: 0, mid: 0, high: 0 });
 
 // Bin i represents i * sampleRate / fftSize Hz. Sum linear power, not dB.
 function bandEnergy(spectrum, sampleRate, fftSize, lowHz, highHz) {
@@ -24,6 +24,7 @@ export function extractFeatures(waveform, spectrum, sampleRate, fftSize) {
   return {
     rms,
     bass: bandEnergy(spectrum, sampleRate, fftSize, 35, 250),
+    mid: bandEnergy(spectrum, sampleRate, fftSize, 250, 2000),
     high: bandEnergy(spectrum, sampleRate, fftSize, 2000, 10000),
   };
 }

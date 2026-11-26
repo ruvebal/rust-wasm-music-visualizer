@@ -50,8 +50,10 @@
       </div>
       <section class="readings" aria-label="Computed audio features">
         <div><label for="rms-meter">Energy <span>opens the vanes</span></label><div><meter id="rms-meter" min="0" max="1" value="0"></meter><output id="rms-output" aria-live="off">0%</output></div></div>
-        <div><label for="bass-meter">Bass <span>expands the core</span></label><div><meter id="bass-meter" min="0" max="1" value="0"></meter><output id="bass-output" aria-live="off">0%</output></div></div>
+        <div><label for="bass-meter">Bass <span>opens + warms</span></label><div><meter id="bass-meter" min="0" max="1" value="0"></meter><output id="bass-output" aria-live="off">0%</output></div></div>
+        <div><label for="mid-meter">Mids <span>turn the assembly</span></label><div><meter id="mid-meter" min="0" max="1" value="0"></meter><output id="mid-output" aria-live="off">0%</output></div></div>
         <div><label for="high-meter">Highs <span>light the edges</span></label><div><meter id="high-meter" min="0" max="1" value="0"></meter><output id="high-output" aria-live="off">0%</output></div></div>
+        <div class="bpm-readout"><span>Rhythm estimate</span><output id="bpm-output" aria-live="off">— BPM</output></div>
       </section>
       <section id="help" class="help" hidden aria-labelledby="help-heading">
         <h2 id="help-heading" tabindex="-1">Play, listen, look.</h2>

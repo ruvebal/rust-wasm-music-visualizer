@@ -89,7 +89,8 @@ MediaElementAudioSourceNode → GainNode → AnalyserNode → speakers
 | File | Responsibility |
 | --- | --- |
 | `src/audio.js` | One media element, one graph, startup cancellation, transport, URL/node disposal |
-| `src/features.js` | Pure RMS/band extraction and finite normalized readings |
+| `src/features.js` | Pure RMS/low-mid-high extraction and finite normalized readings |
+| `src/rhythm.js` | Explainable onset tracker: bounded BPM estimate and beat pulse |
 | `rust/src/lib.rs` | Pure smoothing and bounded visual mappings; native tests |
 | `src/main.js` | DOM, keyboard, Wasm loading, camera, renderer, scheduling and teardown |
 | `src/visualizers/tidal-orrery.js` | Owned scene subtree: geometry, materials, lighting, motion, disposal |
@@ -97,11 +98,13 @@ MediaElementAudioSourceNode → GainNode → AnalyserNode → speakers
 
 The analyser uses a 2048-sample FFT with its internal smoothing set to zero. RMS is
 `sqrt(mean(sample²))`, multiplied by a **Designed** factor of 2 and clamped to 0–1.
-FFT bin `i` is `i * sampleRate / fftSize` Hz. Bass uses 35–250 Hz; highs use
-2–10 kHz (bounded by Nyquist). Each band sums linear power `10^(dB/10)`, takes the
+FFT bin `i` is `i * sampleRate / fftSize` Hz. Low uses 35–250 Hz, mids use
+250–2000 Hz and highs use 2–10 kHz (bounded by Nyquist). Each band sums linear power `10^(dB/10)`, takes the
 square root, multiplies by a Designed factor of 2, and clamps to 0–1. An RMS gate
 below 0.002 suppresses residual FFT history. Values are **Computed relative
-features**, not calibrated loudness, pitch detection or tempo.
+features**, not calibrated loudness or pitch detection. `src/rhythm.js` watches
+repeated low-frequency rises and reports a bounded BPM *estimate* plus a short
+beat pulse; it is an onset teaching example, not a production-grade tempo tracker.
 
 Gain is before the analyser, so quieter output makes a quieter sculpture. The
 slider only attenuates: it does not add clipping by amplifying above unity. The
@@ -145,7 +148,7 @@ export function createVisualizer({ scene, THREE, features, options }) {
   scene.add(root);
   return {
     update({ values, time, delta, reducedMotion }) {
-      // features: stable, read-only object with smoothed rms/bass/high in 0..1.
+      // features: stable rms/low-mid-high readings in 0..1, plus bpm/beatPulse.
       // values: aperture (radians), coreScale (multiplier), radiance (intensity).
       // time: media seconds. delta: bounded animation seconds.
       // Modify only your owned root and its resources.
@@ -200,12 +203,11 @@ state and signal values; it cannot certify listening comfort or every device.
 
 ## Isolated optional extension — future beat events
 
-Only after the base remains stable, add a pure `events.js` detector receiving RMS,
+The specimen includes a deliberately small `rhythm.js` detector receiving RMS,
 bass and media timestamps. Give it explicit previous state, a threshold and a
 minimum event interval. Test synthetic onset sequences, silence, repeated events,
-seek/reset and reduced-motion suppression. Deliver an optional `events` field to
-the visualizer; the current feature pipeline continues working without it. There
-is currently no beat/tempo detection.
+seek/reset and reduced-motion suppression. Students can replace it with
+autocorrelation or a dedicated DSP crate only after they can explain the trade-off.
 
 ## References and provenance
 

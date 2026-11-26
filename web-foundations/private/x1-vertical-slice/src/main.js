@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { AudioTransport } from './audio.js';
 import { clamp, formatTime, silence } from './features.js';
+import { BeatTracker } from './rhythm.js';
 import { createVisualizer } from './visualizers/tidal-orrery.js';
 import './style.css';
 
@@ -16,6 +17,7 @@ let disposed = false;
 let contextLost = false;
 let smoothed = silence();
 const features = silence();
+const rhythm = new BeatTracker();
 let values = { aperture: 0.12, coreScale: 0.72, radiance: 0.15 };
 let lastFrame = performance.now();
 let motionTime = 0;
@@ -26,7 +28,7 @@ scene.background = new THREE.Color('#090f10');
 scene.fog = new THREE.Fog('#090f10', 12, 28);
 const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 40);
 
-function clearHistory() { smoothed = silence(); Object.assign(features, silence()); }
+function clearHistory() { smoothed = silence(); rhythm.reset(); Object.assign(features, silence(), { bpm: 0, beatPulse: 0 }); }
 const transport = new AudioTransport({
   fixtureUrl: `${import.meta.env.BASE_URL}audio/fixture-tone.wav`,
   onChange: renderTransport,
@@ -218,15 +220,16 @@ function animate(now) {
   lastFrame = now;
   motionTime += delta;
   if (document.hidden || contextLost) return;
-  Object.assign(features, transport.features());
+  const time = transport.audio.currentTime || 0;
+  const raw = transport.features();
+  Object.assign(features, raw, rhythm.update({ ...raw, time, delta }));
   if (kernel) {
     const tau = Math.max(Number($('smoothing').value), $('motion').checked ? 0.6 : 0.08);
-    for (const name of ['rms', 'bass', 'high']) smoothed[name] = kernel.smooth(smoothed[name], features[name], delta, tau);
+    for (const name of ['rms', 'bass', 'mid', 'high']) smoothed[name] = kernel.smooth(smoothed[name], features[name], delta, tau);
     // The module receives only smoothed normalized features and bounded visual values.
     Object.assign(features, smoothed);
     values = { aperture: kernel.aperture(features.rms), coreScale: kernel.core_scale(features.bass), radiance: kernel.radiance(features.high) };
   }
-  const time = transport.audio.currentTime || 0;
   visualizer?.update({ values, time, motionTime, delta, reducedMotion: $('motion').checked });
   if ($('drift').checked && !$('motion').checked) {
     placeCamera(Math.sin(time * 0.07) * features.rms * 0.12);
@@ -240,10 +243,11 @@ function animate(now) {
     frameCount = 0; fpsStart = now;
   }
   if (now - lastReadout > 100) {
-    for (const name of ['rms', 'bass', 'high']) {
+    for (const name of ['rms', 'bass', 'mid', 'high']) {
       $(`${name}-meter`).value = features[name];
       $(`${name}-output`).textContent = `${Math.round(features[name] * 100)}%`;
     }
+    $('bpm-output').textContent = features.bpm ? `${features.bpm} BPM` : '— BPM';
     lastReadout = now;
   }
 }
