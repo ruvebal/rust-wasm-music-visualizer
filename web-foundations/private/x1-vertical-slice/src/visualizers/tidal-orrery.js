@@ -62,7 +62,8 @@ export function createVisualizer({ scene, THREE, features, options = {} }) {
   }
 
   const gimbals = new THREE.Group();
-  gimbals.position.y = 0.3;
+  // Lift the wire assembly so its lowest arc clears the plinth and floor.
+  gimbals.position.y = 0.78;
   root.add(gimbals);
   const ringGeometry = new THREE.TorusGeometry(2.18, 0.023, 8, 128);
   const ringA = addMesh(ringGeometry, brass, gimbals);
@@ -114,18 +115,19 @@ export function createVisualizer({ scene, THREE, features, options = {} }) {
       core.rotation.set(0.2, still ? 0 : Math.sin(audioPhase * 0.7) * features.bass, 0.1);
       gimbals.rotation.y = still ? 0 : -phase * 0.42 + Math.sin(audioPhase * 0.4) * features.rms * 0.22;
       marker.scale.setScalar(still ? 1 : 1 + (features.beatPulse || 0) * 1.8);
-      brass.color.setHSL(0.08 - features.bass * 0.035, 0.52, 0.52 + features.bass * 0.12);
-      metal.color.setHSL(0.47 - (features.mid || 0) * 0.12, 0.22 + (features.mid || 0) * 0.35, 0.68);
-      cageMaterial.color.setHSL(0.54 + features.high * 0.12, 0.48, 0.45 + features.high * 0.2);
-      luminous.color.setHSL(0.42 - (features.mid || 0) * 0.12, 0.72, 0.62);
-      luminous.emissive.setHSL(0.42 + features.high * 0.08, 0.78, 0.62);
+      const pulse = features.beatPulse || 0;
+      brass.color.setHSL(0.04 + features.high * 0.1 - features.bass * 0.04, 0.88, 0.42 + features.bass * 0.22);
+      metal.color.setHSL(0.52 - (features.mid || 0) * 0.32, 0.42 + (features.mid || 0) * 0.48, 0.52 + features.mid * 0.2);
+      cageMaterial.color.setHSL(0.58 + features.high * 0.18, 0.7, 0.38 + features.high * 0.3);
+      luminous.color.setHSL(0.38 - (features.mid || 0) * 0.25 + pulse * 0.08, 0.9, 0.58 + pulse * 0.18);
+      luminous.emissive.setHSL(0.48 + features.high * 0.18 + pulse * 0.1, 0.95, 0.62);
       moonOrbit.rotation.z = still ? 0 : phase * 0.8 + (features.bpm || 0) * 0.0008;
-      moon.material.color.setHSL(0.62 - features.high * 0.16, 0.68, 0.62 + features.mid * 0.12);
-      moon.material.emissiveIntensity = 0.25 + features.high * 0.65 + (features.beatPulse || 0) * 0.6;
+      moon.material.color.setHSL(0.66 - features.high * 0.3 + pulse * 0.08, 0.9, 0.58 + features.mid * 0.2);
+      moon.material.emissiveIntensity = 0.35 + features.high * 0.9 + pulse * 1.1;
       // Reduced motion keeps shape fixed; slowly smoothed lighting still explains audio.
       luminous.emissiveIntensity = values.radiance;
       edgeMaterial.opacity = 0.28 + features.high * 0.65;
-      edgeMaterial.color.setHSL(0.42 + features.high * 0.08, 0.78, 0.62);
+      edgeMaterial.color.setHSL(0.42 + features.high * 0.22 + pulse * 0.08, 0.95, 0.62 + pulse * 0.18);
     },
     resize({ width, height, pixelRatio }) {
       // Layout belongs to the host camera. A student shader could update resolution here.
