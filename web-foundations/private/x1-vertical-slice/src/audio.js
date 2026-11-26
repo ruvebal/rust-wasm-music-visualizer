@@ -113,6 +113,7 @@ export class AudioTransport {
   }
 
   useFixture() { this.replace(this.fixtureUrl, 'Studio test tone'); }
+  useThaisTheme(url) { this.replace(url, 'Thais Theme · Owls'); }
   setLoop(value) { this.audio.loop = Boolean(value); this.notify(); }
   setGain(value) { this.gain = clamp(value); this.applyGain(); }
   setMuted(value) { this.muted = Boolean(value); this.applyGain(); }

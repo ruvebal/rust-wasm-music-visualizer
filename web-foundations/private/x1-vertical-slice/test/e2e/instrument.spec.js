@@ -174,6 +174,14 @@ test('production Pages subpath includes architecture and local assets', async ({
   await expect(page.getByRole('heading', { name: 'Tidal Orrery', exact: true })).toBeVisible();
 });
 
+test('professor track is credited and selectable', async ({ page }) => {
+  await ready(page);
+  await expect(page.getByText('© 2024 Rubén Vega Balbás & Thais Vega Egido')).toBeVisible();
+  await page.locator('#thais').click();
+  await expect(page.locator('#track-name')).toHaveText('Thais Theme · Owls');
+  await expect(page.locator('#status')).toContainText('Ready: Thais Theme');
+});
+
 
 test('WebGL context loss pauses audio and recovers without a new graph', async ({ page }) => {
   await ready(page);

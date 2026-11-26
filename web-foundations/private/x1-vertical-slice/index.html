@@ -24,7 +24,8 @@
         <section class="controls" aria-labelledby="controls-heading">
           <h2 id="controls-heading">Give it something to hear</h2>
           <label class="file-label" for="file">Choose local audio<input id="file" type="file" accept="audio/*,.mp3,.wav,.ogg,.m4a,.flac,.opus" /></label>
-          <div class="track-row"><p id="track-name">Studio test tone</p><button id="fixture" type="button">Use test tone</button></div>
+          <div class="track-row"><p id="track-name">Studio test tone</p><div class="track-actions"><button id="fixture" type="button">Test tone</button><button id="thais" type="button">Thais Theme</button></div></div>
+          <p class="credit">“Thais Theme · Owls” · © 2024 Rubén Vega Balbás &amp; Thais Vega Egido</p>
           <p class="status" id="status" role="status">Loading Rust/Wasm…</p>
           <div class="transport-row">
             <button class="primary" id="play" type="button" disabled>Play</button>
@@ -54,11 +55,11 @@
       </section>
       <section id="help" class="help" hidden aria-labelledby="help-heading">
         <h2 id="help-heading" tabindex="-1">Play, listen, look.</h2>
-        <p>Choose an audio file, then press Play. The test tone is a synthetic signal for checking the pipeline. Gain changes both sound and movement. Reset pauses and rewinds the current track, restores controls, and centers the camera.</p>
+        <p>Choose an audio file, then press Play. The sculpture keeps a slow authored orbit even before playback; the music changes its opening, scale and light. Reduce motion freezes the spatial movement. Reset pauses and rewinds the current track, restores controls, and centers the camera.</p>
         <dl class="shortcuts"><div><dt><kbd>Space</kbd></dt><dd>Play / pause</dd></div><div><dt><kbd>L</kbd></dt><dd>Loop</dd></div><div><dt><kbd>M</kbd></dt><dd>Mute</dd></div><div><dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Seek 5 seconds</dd></div><div><dt><kbd>↑</kbd> <kbd>↓</kbd></dt><dd>Gain ±5%</dd></div><div><dt><kbd>R</kbd></dt><dd>Reset</dd></div><div><dt><kbd>?</kbd></dt><dd>Show / hide help</dd></div></dl>
         <p>Focused form controls keep their native keys. Space activates a focused button. Reduced motion fixes the sculpture and camera while retaining slow lighting feedback. You can still move the camera deliberately.</p>
       </section>
-      <footer><p id="mapping-note">An artistic mapping, not an acoustic simulation. <a href="./architecture.html">See how it works</a></p><p>Rubén Vega Balbás / UDIT</p></footer>
+      <footer><p id="mapping-note">An artistic mapping, not an acoustic simulation. <a href="./architecture.html">See how it works</a></p><p>Rubén Vega Balbás / UDIT · Track rights cleared for this demo</p></footer>
     </main>
     <script type="module" src="./src/main.js"></script>
   </body>
