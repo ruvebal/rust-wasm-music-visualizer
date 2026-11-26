@@ -5,7 +5,9 @@ twelve metal vanes, expands a suspended core and illuminates its edges. The exis
 X1 application remains in [`web-foundations/private/x1-vertical-slice`](web-foundations/private/x1-vertical-slice/).
 
 **Pipeline:** local file → HTMLAudioElement → gain → Web Audio analyser → normalized
-features → pure Rust/Wasm mappings → bounded values → Three.js / WebGL2.
+low/mid/high features + onset/BPM estimate → pure Rust/Wasm mappings → bounded
+values → Three.js / WebGL2. The reference scene keeps its moon attached to the
+previously empty orbital wire and colourizes materials from the three bands.
 
 ## Run from a fresh checkout
 
