@@ -76,3 +76,64 @@ Test: `npm run test:unit` passes four tests including silence, corrupt numbers a
 band isolation at 44.1/48/96 kHz. `predev` now builds Wasm on a fresh checkout.
 Could fail: codec support varies by browser; decoding/autoplay/resource lifecycle
 need the real-browser integration checks after the controls are connected.
+
+## Step 3 — one complete 3D instrument
+
+Files: X1 `index.html`, `src/main.js`, `src/style.css`,
+`src/visualizers/tidal-orrery.js`, `public/architecture.html`, generated audio fixture,
+`scripts/generate-fixture.py`, package/lock files, Playwright configuration,
+`test/visualizer.test.mjs`, `test/e2e/instrument.spec.js`, ignore rules.
+
+Concept: hierarchy and ownership. Twelve hinged vanes surround a faceted suspended
+core; intersecting gimbals and a plinth make depth visible. Rust-mapped RMS, bass
+and high energy independently affect hinges, core scale and emission. Closed-form
+media-time angles avoid accumulated frame drift. The browser owns one camera,
+renderer and animation loop; the module owns one disposable subtree.
+
+Implemented controls: local files, play/pause/cancel, seek, audible gain, mute,
+loop, response time, camera orbit/zoom/angle, reset, all requested shortcuts and
+focus-preserving help. Reduced motion follows OS preference, fixes spatial motion
+and slows lighting. A mobile stage Play/Pause control mirrors the main transport.
+A 12-second deterministic studio fixture cycles bass/middle/high/blend/silence;
+its generator is included. Runtime URL plugin loading is explicitly future work.
+
+Test evidence (2026-11-26): `CAPTURE_REVIEW=1 npm test` passed 4 native Rust tests,
+5 JavaScript tests, the compiled Wasm boundary test, and 7 real Chromium tests.
+Browser tests run the production build at `/rust-wasm-music-visualizer/` and cover
+transport, all keys, gain and mute graph values, bands, loop wraparound, invalid
+and undecodable files, repeated replacement, rapid start/reset, end/restart,
+reduced motion, mobile layout, native range keys, missing Wasm, architecture
+links and WebGL context loss/restoration. Normal playback produced no console
+errors. The geometry test verifies repeatable transforms, fixed reduced-motion
+transforms, and exactly-once disposal of every shared resource.
+
+One first browser run failed because its mobile assertion assumed the offscreen
+main Play button would be in view after a viewport resize. The test now scrolls
+to and checks the dedicated stage transport; the button can launch from the first
+mobile viewport. All corrected checks passed. No implementation failures were
+hidden by retries (the suite uses zero retries).
+
+Independent Impeccable finish review: first verdict `fix` for help outside the
+viewport and live-output telemetry. Fixed help focus/scroll/return focus and set
+continuous readouts to `aria-live="off"`. Final verdict: **ship within the reviewed
+scope**, both findings resolved; mobile launch affordance passes. Screenshots
+inspected at desktop 1440×1000 and mobile 390×844, including playing and help
+states. Detector's only warning was flat type hierarchy from failing to resolve
+linked CSS; actual h1 is 2.2–3.5rem and body 1rem. No manual screen-reader session.
+
+Computed local browser timing: headless Chromium 159, 1440×1000 viewport, 120 frame
+intervals during fixture playback: mean 40.45 FPS, p95 33.4 ms; 47 draw calls and
+13 geometries. These are local automated measurements, not a target-device
+performance guarantee. Test attachment retains the measurements. Captures in
+`.impeccable/review/` are local ignored verification artifacts.
+
+Could fail: GPU/browser/codec/device differences remain; real speaker latency,
+listening comfort and physical-phone/screen-reader behavior require those devices.
+The large Three.js bundle produces Vite's advisory chunk-size warning (~192 kB
+gzip overall JS). No runtime warning is suppressed. No new production dependency;
+`@playwright/test` 1.65.1 (Apache-2.0) is development-only.
+
+Test this step: install Chromium once (`npx playwright install chromium`), then
+`npm test`. Use the test-tone bands to inspect each visual response separately;
+upload your music to test it perceptually. `?test` enables read-only local
+`window.orreryTest()` diagnostics, never file content or telemetry upload.
