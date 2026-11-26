@@ -57,3 +57,22 @@ and Wasm tests cover NaN/infinities, silence, independence, repeatability and
 Risk: a browser analyser is sampled at display time, so real audio snapshots can
 vary between browsers; deterministic mapping is not bit-identical music replay.
 The next step replaces the transport/scene and restores meaningful gain.
+
+## Step 2 — audio ownership and normalized features
+
+Files: `src/audio.js`, `src/features.js`, `test/features.test.mjs`, `package.json`.
+The new modules are connected to the host in Step 3. A single media element and
+source node survive track replacement; owned Blob URLs are released. Gain is an
+attenuator (0..1, default 0.7) before analysis and output. A short gain ramp avoids
+clicks. Generation tokens cancel stale asynchronous starts. Seek/reset invalidate
+visual history. Disposal closes listeners, graph, context and media resources.
+
+Concept: Web Audio graph ownership; RMS; FFT bins expressed in Hz; dB-to-power
+conversion; explicit error states. The analyser uses 2048 samples and no internal
+smoothing. RMS is normalized with a Designed factor of 2; bass sums 35–250 Hz power,
+high sums 2–10 kHz power. These are relative readings, not calibrated loudness.
+
+Test: `npm run test:unit` passes four tests including silence, corrupt numbers and
+band isolation at 44.1/48/96 kHz. `predev` now builds Wasm on a fresh checkout.
+Could fail: codec support varies by browser; decoding/autoplay/resource lifecycle
+need the real-browser integration checks after the controls are connected.

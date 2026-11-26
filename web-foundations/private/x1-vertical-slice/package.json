@@ -8,7 +8,9 @@
     "build": "npm run build:wasm && vite build",
     "test:rust": "cargo test --manifest-path rust/Cargo.toml -- --test-threads=1",
     "test:browser": "npm run build:wasm && node test/wasm-boundary.mjs",
-    "test": "npm run test:rust && npm run test:browser"
+    "test": "npm run test:rust && npm run test:unit && npm run test:browser",
+    "test:unit": "node --test test/*.test.mjs",
+    "predev": "npm run build:wasm"
   },
   "dependencies": {
     "three": "^0.180.0"
