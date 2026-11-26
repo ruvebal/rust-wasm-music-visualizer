@@ -16,6 +16,7 @@ const pluginUrl = $('plugin-url');
 const loadPlugin = $('load-plugin');
 
 let kernel;
+let smoothedLevel = 0;
 let audioContext;
 let analyser;
 let source;
@@ -163,8 +164,8 @@ file.addEventListener('change', () => {
 seek.addEventListener('input', () => { if (audioElement) audioElement.currentTime = Number(seek.value); });
 loop.addEventListener('change', () => { if (audioElement) audioElement.loop = loop.checked; });
 
-gain.addEventListener('input', () => { $('gain-output').textContent = `${Number(gain.value).toFixed(1)}×`; kernel?.set_gain(Number(gain.value)); });
-smoothing.addEventListener('input', () => { $('smoothing-output').textContent = Number(smoothing.value).toFixed(2); kernel?.set_smoothing(Number(smoothing.value)); });
+gain.addEventListener('input', () => { $('gain-output').textContent = `${Number(gain.value).toFixed(1)}×`;  });
+smoothing.addEventListener('input', () => { $('smoothing-output').textContent = Number(smoothing.value).toFixed(2);  });
 
 visualizer.addEventListener('change', () => { activePlugin = null; status.textContent = visualizer.value === 'rings' ? 'Pulse rings visualizer' : 'Signal / Form visualizer'; });
 loadPlugin.addEventListener('click', async () => {
@@ -187,7 +188,8 @@ function animate(now = performance.now()) {
   frameCount += 1;
   if (now - fpsWindowStart > 500) { $('fps-readout').textContent = `${Math.round(frameCount * 1000 / (now - fpsWindowStart))} FPS`; frameCount = 0; fpsWindowStart = now; }
   const features = featureValues();
-  const scale = kernel ? kernel.step(features.rms, features.bass, now / 1000) : 1;
+  smoothedLevel = kernel ? kernel.smooth(smoothedLevel, features.rms, delta, Number(smoothing.value)) : 0;
+  const scale = kernel ? kernel.core_scale(smoothedLevel) : 1;
   group.scale.lerp(new THREE.Vector3(scale, scale, scale), Math.min(1, delta * 9));
   group.rotation.y += delta * (0.22 + features.bass * 0.8);
   group.rotation.x = Math.sin(now / 2400) * 0.16;
