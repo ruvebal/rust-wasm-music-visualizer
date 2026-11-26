@@ -37,7 +37,7 @@ pub extern "C" fn aperture(rms: f32) -> f32 {
     0.12 + unit(rms) * 1.1
 }
 
-/// Bass scales the core from 0.72 to 1.30 scene units (Designed).
+/// Bass scales the core from a 0.72 to 1.30 dimensionless multiplier (Designed).
 #[unsafe(no_mangle)]
 pub extern "C" fn core_scale(bass: f32) -> f32 {
     0.72 + unit(bass) * 0.58

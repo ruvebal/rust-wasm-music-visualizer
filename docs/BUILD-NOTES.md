@@ -137,3 +137,34 @@ Test this step: install Chromium once (`npx playwright install chromium`), then
 `npm test`. Use the test-tone bands to inspect each visual response separately;
 upload your music to test it perceptually. `?test` enables read-only local
 `window.orreryTest()` diagnostics, never file content or telemetry upload.
+
+## Step 4 — teach and hand off a deployable artifact
+
+Files: root `README.md`, X1 `README.md`, `.github/workflows/pages.yml`, Rust scale
+comment, and these notes. The guides explain every Rust function, normalized
+feature units, timing limits, complete setup commands and the working module
+contract. The built architecture page is linked from the instrument. One isolated
+optional extension, beat/event detection, is proposed and explicitly not shipped.
+
+The Pages workflow installs Chromium and its Linux dependencies, checks Rust
+formatting and Clippy, runs the full suite (which produces the tested production
+build), then uploads that same dist artifact. No second architecture or backend.
+The owner still selects GitHub Actions as the Pages source and pushes the commits.
+
+Verification: Rust formatting and Clippy passed with warnings denied. The full
+suite and production Pages build passed in Step 3; this step changes documentation
+and CI commands only. Confirm the dist contains HTML, JS/CSS, the architecture
+page, audio and Wasm, and that each HTML bundle URL resolves under the Pages base.
+Could fail: GitHub Pages configuration or unavailable CI package/browser downloads.
+No remote deployment or repository settings change was attempted.
+
+## Local semantic commits
+
+- `56a7276`: explicit, time-based pure Rust API and boundary proof.
+- `31fc59c`: owned audio transport and normalized features.
+- `f9c9e46`: complete sculpture/controls, cleanup and browser acceptance tests.
+- Documentation/CI handoff: the next commit containing this entry.
+
+Rollback: each milestone is an ordinary local Git commit; revert the relevant
+commit in reverse order to unwind its behavior. No history rewrite or remote
+operation is needed. Rebuild Wasm after changing the Rust boundary.

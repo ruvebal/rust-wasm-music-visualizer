@@ -1,35 +1,63 @@
-# Rust/Wasm Music Visualizer Experiment
+# Tidal Orrery — Rust/Wasm Music Visualizer
 
-This repository contains the executable instructor experiment for the UDIT Rust/WebAssembly music-visualizer studio. The teaching plan remains in the companion `web-atelier-udit` repository.
+An interactive kinetic sculpture for the UDIT multimedia studio. Local music opens
+twelve metal vanes, expands a suspended core and illuminates its edges. The existing
+X1 application remains in [`web-foundations/private/x1-vertical-slice`](web-foundations/private/x1-vertical-slice/).
 
-## Current slice
+**Pipeline:** local file → HTMLAudioElement → gain → Web Audio analyser → normalized
+features → pure Rust/Wasm mappings → bounded values → Three.js / WebGL2.
 
-The working prototype is in [`web-foundations/private/x1-vertical-slice`](web-foundations/private/x1-vertical-slice/). It proves:
+## Run from a fresh checkout
 
-- local audio → Web Audio analyser → Rust/Wasm mapping kernel → Three.js GPU scene;
-- local MP3/file replacement, pause/seek/end/error states and looping;
-- gain and smoothing controls;
-- a thin student visualizer module seam.
+Prerequisites: Node.js 22.12+ and a current Rust toolchain supporting edition 2024,
+with the `wasm32-unknown-unknown` target. Commands below run from the repository root.
 
 ```sh
+rustup target add wasm32-unknown-unknown
 cd web-foundations/private/x1-vertical-slice
-npm install
-npm test
+npm ci
 npm run dev -- --host 127.0.0.1
 ```
 
-Open the Vite URL. Do not open the HTML with `file://`.
+`predev` builds Wasm automatically. Open Vite's printed URL. Press **Play** for the
+synthetic test signal or choose a local audio file. Files never leave the browser.
+Serve over HTTP; opening `index.html` with `file://` does not work.
+
+## Verify and build
+
+Run these commands inside the X1 directory:
+
+```sh
+npx playwright install chromium
+npm test
+npm run build
+npm run preview -- --host 127.0.0.1
+```
+
+`npm test` runs native Rust, JavaScript feature/lifecycle, compiled Wasm, and real
+Chromium integration tests. The browser suite builds the production Pages subpath.
+On Linux CI, use `npx playwright install --with-deps chromium`.
+
+## Learn and extend
+
+- [Student guide and module contract](web-foundations/private/x1-vertical-slice/README.md)
+- [Build steps, evidence and lessons from Vibrasolids](docs/BUILD-NOTES.md)
+- The running application's **See how it works** page explains every Rust function.
+
+Space plays/pauses; L loops; M mutes; left/right seek; up/down change gain; R resets;
+? shows help. Focused form controls retain native keys. Reduced motion is initialized
+from the OS preference and can be changed in the interface.
 
 ## GitHub Pages
 
-The repository includes a Pages workflow. After creating the GitHub repository as `ruvebal/rust-wasm-music-visualizer`, push `main`, enable **GitHub Actions** as the Pages source, and the site will be published at:
+The workflow builds, tests and uploads the static `dist/` artifact on pushes to
+`main`. Enable **GitHub Actions** as the repository's Pages source. Vite uses
+`/rust-wasm-music-visualizer/` during Actions builds; all audio/Wasm/document links
+respect that base path. No backend, credentials, microphone or cross-origin
+isolation is required. Deployment itself is an owner action; these changes do not
+push or change repository settings.
 
-`https://ruvebal.github.io/rust-wasm-music-visualizer/`
+The companion teaching plan remains in the sibling Web Atelier repository under
+`frontend-pedagogy/DEV_PLAN/RUST-WASM-MUSIC-VISUALIZER/`.
 
-## Teaching companion
-
-The lesson sequence, assignments and challenge brief live in the sibling repository:
-
-`../web-atelier-udit/frontend-pedagogy/DEV_PLAN/RUST-WASM-MUSIC-VISUALIZER/`
-
-The experiment is deliberately versioned separately so classroom prose can refer to tagged runnable milestones without mixing student-facing content with application implementation.
+Author: Rubén Vega Balbás, PhD · ruvebal@crea-comm.net · UDIT
